@@ -3,7 +3,7 @@ import tensorflow.contrib.slim as sl
 import cv2
 import os
 import numpy as np
-base_dir = '/Users/hsw/Desktop/faces/'
+base_dir = './faces/'
 counter = 0
 x_inputs = []
 for filename in os.listdir(base_dir):
@@ -109,10 +109,10 @@ update_g = opt_g.apply_gradients(g_grads)
 
 print('start to train:')
 batch_size = 100
-epoch = 1000
+epoch = 20
 
-gen_image_dir = '/Users/hsw/Desktop/gen_faces/gen_image'
-model_save_dir = '/Users/hsw/Desktop/gen_faces/model_save'
+gen_image_dir = './gen_image'
+model_save_dir = './model_save'
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 with tf.Session() as sess:
@@ -130,15 +130,19 @@ with tf.Session() as sess:
             lossd, _ = sess.run([loss_d, update_d],
                                 feed_dict={z_input: z_in, image_input: x_inputs[batch:(batch + batch_size)]})
             lossg, _ = sess.run([loss_g, update_g], feed_dict={z_input: z_in})
-            batch = batch + batch_size
-			counter1 = counter1 + 1
-            print(lossd, lossg)
-        for j in range(batch, len(x_inputs)):
-            z_in = np.random.uniform(-1.0, 1.0, size=[len(x_inputs) - batch, z_size]).astype(np.float32)
-            lossd, _ = sess.run([loss_d, update_d], feed_dict={z_input: z_in, image_input: x_inputs[batch:]})
             lossg, _ = sess.run([loss_g, update_g], feed_dict={z_input: z_in})
-        print('No :' + str(j) + 'epoch' + str(loss_d) + '   ' + str(loss_g))
-        if (epoch == 100):
+            batch = batch + batch_size
+            counter1 = counter1 + 1
+            print(lossd, lossg)
+
+        print('batch' + str(counter1) + 'has begun to train>>>>>>>>>>>>>')
+        z_in = np.random.uniform(-1.0, 1.0, size=[len(x_inputs) - batch, z_size]).astype(np.float32)
+        lossd, _ = sess.run([loss_d, update_d], feed_dict={z_input: z_in, image_input: x_inputs[batch:]})
+        lossg, _ = sess.run([loss_g, update_g], feed_dict={z_input: z_in})
+        lossg, _ = sess.run([loss_g, update_g], feed_dict={z_input: z_in})
+        print('last batch has finished.')
+        print('No :' + str(i) + 'epoch' + str(loss_d) + '   ' + str( loss_g))
+        if (epoch == 5):
             if (not os.path.exists(gen_image_dir)):
                 os.makedirs(gen_image_dir)
             z = np.random.uniform(-1.0, 1.0, size=[5, z_size]).astype(np.float32)
